@@ -41,6 +41,8 @@ function DashboardSidebar() {
   const [workspaces, setWorkspaces] = useState<any[]>([])
   const [isLoadingContexts, setIsLoadingContexts] = useState(false)
   const [isLoadingWorkspaces, setIsLoadingWorkspaces] = useState(false)
+  const [hasFetchedContexts, setHasFetchedContexts] = useState(false)
+  const [hasFetchedWorkspaces, setHasFetchedWorkspaces] = useState(false)
 
   // Get user information from token
   useEffect(() => {
@@ -50,33 +52,37 @@ function DashboardSidebar() {
 
   // Fetch contexts when submenu opens
   useEffect(() => {
-    if (contextsOpen && contexts.length === 0 && !isLoadingContexts) {
+    if (contextsOpen && !hasFetchedContexts && !isLoadingContexts) {
       setIsLoadingContexts(true)
       listContexts()
         .then(data => {
           setContexts(data || [])
+          setHasFetchedContexts(true)
         })
         .catch(err => {
           console.error('Failed to fetch contexts:', err)
+          setHasFetchedContexts(true)
         })
         .finally(() => setIsLoadingContexts(false))
     }
-  }, [contextsOpen, contexts.length, isLoadingContexts])
+  }, [contextsOpen, hasFetchedContexts, isLoadingContexts])
 
   // Fetch workspaces when submenu opens
   useEffect(() => {
-    if (workspacesOpen && workspaces.length === 0 && !isLoadingWorkspaces) {
+    if (workspacesOpen && !hasFetchedWorkspaces && !isLoadingWorkspaces) {
       setIsLoadingWorkspaces(true)
       listWorkspaces()
         .then(data => {
           setWorkspaces(data || [])
+          setHasFetchedWorkspaces(true)
         })
         .catch(err => {
           console.error('Failed to fetch workspaces:', err)
+          setHasFetchedWorkspaces(true)
         })
         .finally(() => setIsLoadingWorkspaces(false))
     }
-  }, [workspacesOpen, workspaces.length, isLoadingWorkspaces])
+  }, [workspacesOpen, hasFetchedWorkspaces, isLoadingWorkspaces])
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path + "/")
@@ -155,8 +161,11 @@ function DashboardSidebar() {
                   >
                     <button
                       onClick={() => {
+                        const wasOpen = contextsOpen
                         setContextsOpen(!contextsOpen)
-                        navigateTo('/contexts')
+                        if (!wasOpen) {
+                          navigateTo('/contexts')
+                        }
                       }}
                       className="flex items-center justify-between w-full"
                       type="button"
@@ -216,8 +225,11 @@ function DashboardSidebar() {
                   >
                     <button
                       onClick={() => {
+                        const wasOpen = workspacesOpen
                         setWorkspacesOpen(!workspacesOpen)
-                        navigateTo('/workspaces')
+                        if (!wasOpen) {
+                          navigateTo('/workspaces')
+                        }
                       }}
                       className="flex items-center justify-between w-full"
                       type="button"
